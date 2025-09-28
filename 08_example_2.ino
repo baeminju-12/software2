@@ -13,6 +13,7 @@
 
 #define TIMEOUT ((INTERVAL / 2) * 1000.0) // maximum echo waiting time (unit: usec)
 #define SCALE (0.001 * 0.5 * SND_VEL) // coefficent to convert duration to distance
+unsigned long last_sampling_time;   // unit: msec
 
 void setup() {
   pinMode(PIN_LED, OUTPUT);
@@ -25,7 +26,9 @@ void setup() {
 void loop() {
   float distance = USS_measure(PIN_TRIG, PIN_ECHO); // read distance
   int pwmValue = 255; //기본값 꺼짐..
-
+  
+  if (millis() < (last_sampling_time + INTERVAL))
+    return;
   if ((distance == 0.0) || (distance < _DIST_MIN) || (distance > _DIST_MAX)) {
     pwmValue = 255; // 범위 밖이면 꺼짐
   } else {
@@ -57,3 +60,4 @@ float USS_measure(int TRIG, int ECHO)
   
   return pulseIn(ECHO, HIGH, TIMEOUT) * SCALE; // unit: mm
 }
+
